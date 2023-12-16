@@ -1,0 +1,56 @@
+<!-- signup.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up Page</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="css/override.css" />
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>Sign Up</h2>
+
+      <!-- Choose Role Section -->
+      <select id="userType" name="userType">
+        <option disabled selected value="">Choose Role</option>
+        <option value="customer">Customer</option>
+        <option value="restaurant owner">Restaurant Owner</option>
+      </select>
+
+      <form id="signupForm" onsubmit="signup(event)">
+        <label for="firstname">Firstname:</label>
+        <input type="text" id="firstname" name="firstname" required />
+        <label for="lastname">Lastname:</label>
+        <input type="text" id="lastname" name="lastname" required />
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+        <label for="signupPassword">Password:</label>
+        <input
+          type="password"
+          id="signupPassword"
+          name="signupPassword"
+          required
+        />
+        <button type="submit" class="btn btn-success">Sign Up</button>
+      </form>
+
+      <hr />
+
+      <a href="login.html" class="btn btn-link">Log In</a>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js/index.js"></script>
+    <!-- signup.html -->
+  </body>
+</html>

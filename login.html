@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="css/override.css" />
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>Login</h2>
+
+      <select id="userType" name="userType" required>
+        <option disabled selected value="">Choose Role</option>
+        <option value="customer">Customer</option>
+        <option value="staff">Staff</option>
+    </select>
+
+      <form id="loginForm" onsubmit="login(event)">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+        <button type="submit" class="btn btn-primary">Log In</button>
+        <br />
+      </form>
+
+      <p>OR</p>
+
+      <hr />
+      <!-- Add a horizontal line to separate login and signup -->
+
+      <!-- Sign Up Section -->
+      <a href="signup.html" class="btn btn-link">Sign Up</a>
+        </form>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js/index.js"></script>
+
+    </script>
+  </body>
+</html>
