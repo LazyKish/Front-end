@@ -68,6 +68,7 @@ function logout() {
     .then((response) => {
       localStorage.removeItem("token");
       localStorage.removeItem("owner_id");
+      localStorage.removeItem("userType");
       window.location.href = "login.html";
     })
     .catch((error) => console.log("error", error));
@@ -143,11 +144,42 @@ function handleAccessControl() {
   }
 }
 
-// Perform access control checks when the page loads
-window.addEventListener("load", handleAccessControl);
+/*=========================================================================================================================================*/
 
-// Perform access control checks when the URL changes
-window.addEventListener("popstate", handleAccessControl);
+document.addEventListener("DOMContentLoaded", function () {
+  const userType = localStorage.getItem("userType");
+  const currentPage = window.location.pathname.split("/").pop();
+
+  console.log("User Type:", userType);
+  console.log("Current Page:", currentPage);
+
+  // Define allowed pages for different user types
+  const allowedPages = {
+    customer: ["main.html", "reservation.html"],
+    staff: ["restaurant.html", "owner.html", "restaurantreservations.html"],
+    null: ["login.html", "signup.html"],
+  };
+
+  // Check if userType is allowed on the current page
+  if (
+    !allowedPages[userType] ||
+    !allowedPages[userType].includes(currentPage)
+  ) {
+    // Redirect to a default page or display an error message
+    window.location.href = getDefaultPageForUser(userType); // Define this function based on your needs
+  }
+});
+
+// Function to get default page based on userType
+function getDefaultPageForUser(userType) {
+  if (userType === "customer") {
+    return "main.html"; // Redirect customer to main.html
+  } else if (userType === "staff") {
+    return "restaurant.html"; // Redirect staff to restaurant.html
+  } else {
+    return "login.html"; // Redirect to login page for unknown userType
+  }
+}
 
 /*=========================================================================================================================================*/
 
@@ -178,21 +210,24 @@ function fetchRestaurants() {
       data.forEach((restaurant) => {
         var restaurantCard = document.createElement("div");
         restaurantCard.innerHTML = `
-        <div class="card h-100">
-          <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
-          <div class="card-body p-4">
-            <div class="text-center">
-              <h5 class="fw-bolder">${restaurant.restaurant_name}</h5>
-              <p>${restaurant.description}</p>
-              <button class="btn btn-primary book-now-btn"
-              data-bs-toggle="modal"
-              data-bs-target="#bookingModal"
-              onclick="bookTable(${restaurant.id})">Book Now</button>
+          <div class="card h-100">
+            <img class="card-img-top" src="" alt="..." /> <!-- Initially empty -->
+            <div class="card-body p-4">
+              <div class="text-center">
+                <h5 class="fw-bolder">${restaurant.restaurant_name}</h5>
+                <p>${restaurant.description}</p>
+                <button class="btn btn-primary book-now-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#bookingModal"
+                onclick="bookTable(${restaurant.id})">Book Now</button>
+              </div>
             </div>
-          </div>
-        </div>`;
+          </div>`;
 
         restaurantContainer.appendChild(restaurantCard);
+
+        // Fetch and set the image for each restaurant
+        fetchRestaurantImage1(restaurant.id, restaurantCard);
       });
     })
     .catch((error) => {
@@ -200,10 +235,45 @@ function fetchRestaurants() {
     });
 }
 
+// Function to fetch and set the image for each restaurant card
+function fetchRestaurantImage1(restaurantId, restaurantCard) {
+  var myHeaders = new Headers();
+  myHeaders.append("Accept", "application/json");
+  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
+
+  var requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+    redirect: "follow",
+  };
+
+  fetch(
+    `http://localhost/Final-backend/public/api/restaurant/fetchimage/${restaurantId}`,
+    requestOptions
+  )
+    .then((response) => {
+      if (response.ok) {
+        return response.blob(); // Assuming the image is returned as a blob
+      } else {
+        throw new Error("Failed to fetch restaurant image");
+      }
+    })
+    .then((imageBlob) => {
+      const imageUrl = URL.createObjectURL(imageBlob);
+      const imgElement = restaurantCard.querySelector(".card-img-top");
+      imgElement.src = imageUrl;
+    })
+    .catch((error) => {
+      console.error("Error fetching image:", error);
+      // Handle specific error message or show a default image to the user
+    });
+}
+
 // Call fetchRestaurants on page load or after login success
 document.addEventListener("DOMContentLoaded", function () {
   const userType = localStorage.getItem("userType");
-  if (userType == "customer") {
+  const currentPage = window.location.pathname.split("/").pop();
+  if (userType == "customer" && currentPage == "main.html") {
     fetchRestaurants();
   }
 });
@@ -295,13 +365,7 @@ function fetchReservations() {
       }
     })
     .then((data) => {
-      var reservationTableBody = document.getElementById(
-        "reservationTableBody"
-      );
-
       data.forEach((reservation) => {
-        var row = document.createElement("tr");
-
         // Fetch restaurant name based on reservation's restaurant ID
         fetch(
           `http://localhost/Final-backend/public/api/restaurant/${reservation.restaurant_id}`,
@@ -317,26 +381,68 @@ function fetchReservations() {
           .then((restaurantData) => {
             const restaurantName = restaurantData.restaurant_name;
 
-            // Populate the table row with reservation and restaurant data
+            // Create a table row for the reservation
+            var row = document.createElement("tr");
             row.innerHTML = `
               <td>${restaurantName}</td>
-                <td>${reservation.reserve_date}</td>
-                <td>${reservation.reserve_time} ${reservation.time_of_day}</td>
-                <td>${reservation.status}</td>
-                <td class="text-end">
+              <td>${reservation.reserve_date}</td>
+              <td>${reservation.reserve_time} ${reservation.time_of_day}</td>
+              <td>${reservation.status}</td>
+              <!-- Add other reservation details as needed -->
+            `;
+
+            // Determine the container based on the reservation's status
+            var containerId = "";
+            switch (reservation.status) {
+              case "Accepted":
+                containerId = "acceptedreservationTableBody";
+                // Add buttons for accepted reservations
+                row.innerHTML += `
+              <td class="text-end">
                 <button class="btn btn-primary btn-sm" onclick="displayReservationDetails(${reservation.id})">Details</button>
-                  <button class="btn btn-primary btn-sm" onclick="editReservation(event,${reservation.id},${restaurantData.id})">Edit</button>
-                  <button class="btn btn-danger btn-sm" onclick="cancelReservation(event,${reservation.id})">Cancel</button>
-                </td>
-              `;
-            reservationTableBody.appendChild(row);
-          })
-          .catch((error) => {
-            console.log("Error fetching restaurant name:", error);
+                <button class="btn btn-danger btn-sm" onclick="cancelReservation(event,${reservation.id})">Cancel</button>
+              </td>
+            `;
+                break;
+              case "Pending":
+                containerId = "pendingreservationTableBody";
+                // Add buttons for pending reservations
+                row.innerHTML += `
+              <td class="text-end">
+                <button class="btn btn-primary btn-sm" onclick="displayReservationDetails(${reservation.id})">Details</button>
+                <button class="btn btn-primary btn-sm" onclick="editReservation(event,${reservation.id},${reservation.restaurant_id})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="cancelReservation(event,${reservation.id})">Cancel</button>
+              </td>
+            `;
+                break;
+              case "Rejected":
+                containerId = "rejectedreservationTableBody";
+                // Add buttons for rejected reservations
+                row.innerHTML += `
+              <td class="text-end">
+                <button class="btn btn-primary btn-sm" onclick="displayReservationDetails(${reservation.id})">Details</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteReservation(${reservation.id})">Delete</button>
+              </td>
+            `;
+                break;
+              default:
+                // For unknown status, you can decide whether to handle differently or skip
+                break;
+            }
+
+            // Append the row to the corresponding container
+            var container = document.getElementById(containerId);
+            if (container) {
+              container.appendChild(row);
+            } else {
+              console.log("Container not found for reservation:", reservation);
+            }
           });
       });
+    })
+    .catch((error) => {
+      console.error("Error fetching reservations:", error);
     });
-  // Call fetchReservations on page load
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -414,9 +520,6 @@ function editReservation(event, reservationId, restaurantId) {
           updateData.append("special_request", request);
           updateData.append("customer_id", customer_id);
           updateData.append("restaurant_id", restaurantId);
-          if (reservation.status == "Rejected") {
-            updateData.append("status", "Pending");
-          }
 
           const updateOptions = {
             method: "PUT",
@@ -462,6 +565,34 @@ function editReservation(event, reservationId, restaurantId) {
 }
 
 /*=========================================================================================================================================*/
+function deleteReservation(reservationId) {
+  const myHeaders = new Headers();
+  myHeaders.append("Accept", "application/json");
+  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
+
+  const requestOptions = {
+    method: "DELETE",
+    headers: myHeaders,
+    redirect: "follow",
+  };
+
+  fetch(
+    `http://localhost/Final-backend/public/api/customerreservation/${reservationId}`,
+    requestOptions
+  )
+    .then((response) => {
+      if (response.ok) {
+        alert("Reservation deleted successfully!");
+        window.location.reload();
+      } else {
+        throw new Error("Failed to delete reservation");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error deleting reservation. Please try again.");
+    });
+}
 
 function cancelReservation(event, reservationId) {
   event.preventDefault();
@@ -925,8 +1056,11 @@ function showRestaurant() {
     redirect: "follow",
   };
 
+  // Fetch and display the restaurant image initially
+  fetchRestaurantImage();
+
   fetch(
-    "http://localhost/Final-backend/public/api/restaurant/" + restaurantId,
+    `http://localhost/Final-backend/public/api/restaurant/${restaurantId}`,
     requestOptions
   )
     .then((response) => {
@@ -954,12 +1088,108 @@ function showRestaurant() {
       // Handle specific error message or show a generic error to the user
     });
 }
+
+// Function to fetch and display the restaurant image
+function fetchRestaurantImage() {
+  var restaurantId = getUrlParameter("restaurantId");
+  var myHeaders = new Headers();
+  myHeaders.append("Accept", "application/json");
+  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
+
+  var requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+    redirect: "follow",
+  };
+
+  const preview = document.getElementById("previewImage");
+
+  fetch(
+    `http://localhost/Final-backend/public/api/restaurant/fetchimage/${restaurantId}`,
+    requestOptions
+  )
+    .then((response) => {
+      if (response.ok) {
+        return response.blob(); // Assuming the image is returned as a blob
+      } else {
+        throw new Error("Failed to fetch restaurant image");
+      }
+    })
+    .then((imageBlob) => {
+      URL.revokeObjectURL(preview.src); // Revoke previous object URL
+      const imageUrl = URL.createObjectURL(imageBlob);
+      preview.src = imageUrl;
+    })
+    .catch((error) => {
+      console.error("Error fetching image:", error);
+      // Handle specific error message or show a default image to the user
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const currentPage = window.location.pathname.split("/").pop();
-  if (currentPage == "restaurant.html") {
+  if (currentPage === "restaurant.html") {
     showRestaurant();
   }
 });
+
+// Rest of your functions (previewFile, uploadImage, etc.)
+
+document.addEventListener("DOMContentLoaded", function () {
+  const currentPage = window.location.pathname.split("/").pop();
+  if (currentPage === "restaurant.html") {
+    showRestaurant();
+  }
+});
+
+function previewFile() {
+  const preview = document.getElementById("previewImage");
+  const fileInput = document.getElementById("imageInput");
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onloadend = function () {
+    preview.src = reader.result;
+  };
+
+  if (file) {
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = "";
+  }
+}
+
+function uploadImage() {
+  var fileInput = document.getElementById("imageInput");
+  var restaurantId = getUrlParameter("restaurantId");
+
+  var myHeaders = new Headers();
+  myHeaders.append("Accept", "application/json");
+  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
+
+  var formdata = new FormData();
+  formdata.append("image", fileInput.files[0]);
+  formdata.append("_method", "PUT");
+
+  var requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: formdata,
+    redirect: "follow",
+  };
+
+  fetch(
+    `http://localhost/Final-backend/public/api/restaurant/image/${restaurantId}`,
+    requestOptions
+  )
+    .then((response) => response.text())
+    .then((result) => {
+      console.log(result);
+      window.location.reload();
+      showRestaurant(); // Fetch and display updated restaurant details including the image
+    })
+    .catch((error) => console.log("error", error));
+}
 
 /*=========================================================================================================================================*/
 
