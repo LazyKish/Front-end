@@ -7,6 +7,7 @@ async function fetchRestaurants() {
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${token}`, // Fix the syntax error here
+      "ngrok-skip-browser-warning": "69420",
     },
   };
 
@@ -47,13 +48,15 @@ async function fetchRestaurants() {
 }
 
 function fetchRestaurantImage1(restaurantId, restaurantCard) {
-  var myHeaders = new Headers();
-  myHeaders.append("Accept", "application/json");
-  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
+  const token = localStorage.getItem("token");
 
-  var requestOptions = {
+  const requestOptions = {
     method: "GET",
-    headers: myHeaders,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "69420",
+    },
     redirect: "follow",
   };
 
@@ -139,15 +142,16 @@ function bookTable(restaurantId) {
 /*=========================================================================================================================================*/
 
 function fetchReservations() {
-  var myHeaders = new Headers();
-  myHeaders.append("Accept", "application/json");
-  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
-
   var customer_id = localStorage.getItem("customer_id");
+  const token = localStorage.getItem("token");
 
-  var requestOptions = {
+  const requestOptions = {
     method: "GET",
-    headers: myHeaders,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "69420",
+    },
     redirect: "follow",
   };
 
@@ -247,12 +251,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-  const currentPage = window.location.pathname.split("/").pop();
-  if (currentPage == "reservation.html") {
-    fetchReservations();
-  }
-});
 /*=========================================================================================================================================*/
 
 /*=========================================================================================================================================*/
@@ -268,10 +266,15 @@ function editReservation(event, reservationId, restaurantId) {
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded"); // Set the content type
 
   var customer_id = localStorage.getItem("customer_id");
+  const token = localStorage.getItem("token");
 
   const requestOptions = {
     method: "GET",
-    headers: myHeaders,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "69420",
+    },
     redirect: "follow",
   };
 
@@ -436,15 +439,16 @@ function cancelReservation(event, reservationId) {
 }
 
 function displayReservationDetails(reservationId) {
-  const myHeaders = new Headers();
-  myHeaders.append("Accept", "application/json");
-  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
-
   const modalBody = document.querySelector("#reservationdetails .modal-body");
+  const token = localStorage.getItem("token");
 
   const requestOptions = {
     method: "GET",
-    headers: myHeaders,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "69420",
+    },
     redirect: "follow",
   };
 

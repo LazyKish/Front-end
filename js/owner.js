@@ -1,31 +1,31 @@
 async function fetchOwnerRestaurants() {
   try {
-    const owner_id = localStorage.getItem("owner_id");
     const token = localStorage.getItem("token");
+    const owner_id = localStorage.getItem("owner_id");
 
-    var myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
-
-    const response = await fetch(`${backendUrl}/restaurantowned/${owner_id}`, {
+    const requestOptions = {
       method: "GET",
-      headers: myHeaders,
-    });
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+        "ngrok-skip-browser-warning": "69420",
+      },
+      redirect: "follow",
+    };
 
-    if (!response.ok) {
-      throw new Error(
-        "Failed to fetch restaurants. HTTP status: " + response.status
-      );
-    }
+    const response = await fetch(
+      `${backendUrl}restaurantowned/${owner_id}`,
+      requestOptions
+    );
 
-    const json = await response.json();
-    console.log(json); // Log the JSON data
+    if (response.ok) {
+      const data = await response.json();
+      const restaurantss = document.getElementById("restaurantss");
 
-    const restaurantss = document.getElementById("restaurantss");
-    json.forEach((restaurant) => {
-      const restaurantInfo = document.createElement("div");
-      restaurantInfo.className = "col-12 mt-3";
-      restaurantInfo.innerHTML = `
+      data.forEach((restaurant) => {
+        const restaurantInfo = document.createElement("row");
+        restaurantInfo.className = "col-12 mt-3";
+        restaurantInfo.innerHTML = `
           <div class="row">
             <div class="col">
               <h4><a href="restaurant.html?restaurantId=${restaurant.id}">${restaurant.restaurant_name}</a></h4>
@@ -37,17 +37,20 @@ async function fetchOwnerRestaurants() {
           </div>
           <hr>
         `;
-      restaurantss.appendChild(restaurantInfo);
-    });
+        restaurantss.appendChild(restaurantInfo);
+      });
+    } else {
+      throw new Error("Failed to fetch restaurants");
+    }
   } catch (error) {
-    console.error("Error fetching restaurants:", error);
+    console.log("error", error);
   }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   const userType = localStorage.getItem("userType");
   const currentPage = window.location.pathname.split("/").pop();
-  if (userType == "staff" && currentPage == "owner.html") {
+  if (userType === "staff" && currentPage === "owner.html") {
     fetchOwnerRestaurants();
   }
 });
@@ -76,10 +79,15 @@ function updateRestaurant(event, restaurantId) {
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
   const owner_id = localStorage.getItem("owner_id");
+  const token = localStorage.getItem("token");
 
-  var requestOptions = {
+  const requestOptions = {
     method: "GET",
-    headers: myHeaders,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "69420",
+    },
     redirect: "follow",
   };
 
@@ -232,46 +240,46 @@ function deleteRestaurant(event, restaurantId) {
   // Show the modal when the delete button is clicked
   $("#deleteRestaurantModal").modal("show");
 
-  const deleteConfirmationButton = document.getElementById(
-    "deleteConfirmationButton"
-  );
-  deleteConfirmationButton.addEventListener("click", function (event) {
+  const deleteButton = document.getElementById("deletebutton");
+  deleteButton.addEventListener("click", function (event) {
     try {
       event.preventDefault();
-      console.log("Delete confirmation button clicked!");
+      console.log("Delete button clicked!");
 
-      const myHeaders = new Headers();
-      myHeaders.append("Accept", "application/json");
-      myHeaders.append(
-        "Authorization",
-        "Bearer " + localStorage.getItem("token")
-      );
-
-      const requestOptions = {
-        method: "DELETE",
-        headers: myHeaders,
-        redirect: "follow",
-      };
-
-      fetch(`${backendUrl}restaurant/${restaurantId}`, requestOptions)
-        .then((response) => {
-          if (response.ok) {
-            alert("Restaurant deleted successfully!");
-            window.location.reload();
-          } else {
-            throw new Error("Failed to delete restaurant");
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          alert("Error deleting restaurant. Please try again.");
-        });
+      // Call deleteRestaurant function with appropriate parameters
+      deleteRestaurant(event, restaurantId); // Ensure 'restaurantId' is defined here
     } catch (error) {
       console.error("Error handling delete action:", error); // Log any caught errors
     }
-
     // Hide the modal when the delete confirmation button is clicked
     $("#deleteRestaurantModal").modal("hide");
+
+    const myHeaders = new Headers();
+    myHeaders.append("Accept", "application/json");
+    myHeaders.append(
+      "Authorization",
+      "Bearer " + localStorage.getItem("token")
+    );
+
+    const requestOptions = {
+      method: "DELETE",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+
+    fetch(`${backendUrl}restaurant/` + restaurantId, requestOptions)
+      .then((response) => {
+        if (response.ok) {
+          alert("Restaurant deleted successfully!");
+          window.location.reload();
+        } else {
+          throw new Error("Failed to delete restaurant");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Error deleting restaurant. Please try again.");
+      });
   });
 }
 
@@ -307,13 +315,15 @@ function getUrlParameter(name) {
 
 function showRestaurant() {
   var restaurantId = getUrlParameter("restaurantId");
-  var myHeaders = new Headers();
-  myHeaders.append("Accept", "application/json");
-  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
+  const token = localStorage.getItem("token");
 
-  var requestOptions = {
+  const requestOptions = {
     method: "GET",
-    headers: myHeaders,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "69420",
+    },
     redirect: "follow",
   };
 
@@ -350,19 +360,21 @@ function showRestaurant() {
 // Function to fetch and display the restaurant image
 function fetchRestaurantImage() {
   var restaurantId = getUrlParameter("restaurantId");
-  var myHeaders = new Headers();
-  myHeaders.append("Accept", "application/json");
-  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
+  const token = localStorage.getItem("token");
 
-  var requestOptions = {
+  const requestOptions = {
     method: "GET",
-    headers: myHeaders,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "69420",
+    },
     redirect: "follow",
   };
 
   const preview = document.getElementById("previewImage");
 
-  fetch(`${backendUrl}restaurant/${restaurantId}`, requestOptions)
+  fetch(`${backendUrl}restaurant/fetchimage/${restaurantId}`, requestOptions)
     .then((response) => {
       if (response.ok) {
         return response.blob(); // Assuming the image is returned as a blob
@@ -447,15 +459,16 @@ function uploadImage() {
 /*=========================================================================================================================================*/
 
 function fetchReservations1() {
-  var myHeaders = new Headers();
-  myHeaders.append("Accept", "application/json");
-  myHeaders.append("Authorization", "Bearer " + localStorage.getItem("token"));
-
   var owner_id = localStorage.getItem("owner_id");
+  const token = localStorage.getItem("token");
 
-  var requestOptions = {
+  const requestOptions = {
     method: "GET",
-    headers: myHeaders,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "69420",
+    },
     redirect: "follow",
   };
 
@@ -470,7 +483,10 @@ function fetchReservations1() {
     .then((data) => {
       data.forEach((reservation) => {
         // Fetch restaurant name based on reservation's restaurant ID
-        fetch(`${backendUrl}customer${reservation.customer_id}`, requestOptions)
+        fetch(
+          `${backendUrl}customer/${reservation.customer_id}`,
+          requestOptions
+        )
           .then((response) => {
             if (response.ok) {
               return response.json();
