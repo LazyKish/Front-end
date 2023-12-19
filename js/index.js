@@ -1,6 +1,6 @@
 /*=========================================================================================================================================*/
 const backendUrl =
-  "https://4c38-158-62-75-82.ngrok-free.app/Final-backend/public/api/";
+  "https://405e-158-62-75-82.ngrok-free.app/Final-backend/public/api/";
 
 function login(event) {
   event.preventDefault();
@@ -133,60 +133,5 @@ async function signup(event) {
 }
 
 // Rest of your code remains unchanged...
-
-function checkLoggedIn() {
-  const token = localStorage.getItem("token");
-  return token !== null && token !== undefined;
-}
-
-function handleAccessControl() {
-  const currentPage = window.location.pathname.split("/").pop();
-  const tokenExists = checkLoggedIn();
-
-  console.log("Token Exists:", tokenExists);
-  console.log("Current Page:", currentPage);
-
-  if (!tokenExists && currentPage !== "index.html") {
-    console.log("User not logged in. Redirecting to login...");
-    window.location.href = "index.html";
-  }
-}
-
-/*=========================================================================================================================================*/
-
-document.addEventListener("DOMContentLoaded", function () {
-  const userType = localStorage.getItem("userType");
-  const currentPage = window.location.pathname.split("/").pop();
-
-  console.log("User Type:", userType);
-  console.log("Current Page:", currentPage);
-
-  // Define allowed pages for different user types
-  const allowedPages = {
-    customer: ["main.html", "reservation.html"],
-    staff: ["restaurant.html", "owner.html", "restaurantreservations.html"],
-    null: ["index.html", "signup.html"],
-  };
-
-  // Check if userType is allowed on the current page
-  if (
-    !allowedPages[userType] ||
-    !allowedPages[userType].includes(currentPage)
-  ) {
-    // Redirect to a default page or display an error message
-    window.location.href = getDefaultPageForUser(userType); // Define this function based on your needs
-  }
-});
-
-// Function to get default page based on userType
-function getDefaultPageForUser(userType) {
-  if (checkLoggedIn() && userType === "customer") {
-    return "main.html"; // Redirect customer to main.html
-  } else if (checkLoggedIn() && userType === "staff") {
-    return "restaurant.html"; // Redirect staff to restaurant.html
-  } else {
-    return "index.html"; // Redirect to login page for unknown userType
-  }
-}
 
 /*=========================================================================================================================================*/
