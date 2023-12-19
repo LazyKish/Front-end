@@ -143,6 +143,7 @@ function updateRestaurant(event, restaurantId) {
             .then((response) => {
               if (response.ok) {
                 alert("Restaurant updated successfully!");
+                $("#updateRestaurantModal").modal("hide");
                 // Additional logic after successful update if needed
               } else {
                 if (response.status === 422) {

@@ -26,13 +26,6 @@ body {
   border: none;
 }
 
-#sidebar {
-  background-image: url("assets/cup-coffee-mug-bokeh.jpg");
-  background-size: cover;
-  background-position: center;
-  color: #fff;
-}
-
 #customer-info {
   text-align: center;
   margin-top: 90px; /* Adjust the margin-top value as needed */
@@ -93,7 +86,6 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-image: url("assets/cup-coffee-mug-bokeh.jpg");
 }
 
 .login-container {
