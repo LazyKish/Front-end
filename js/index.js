@@ -1,6 +1,6 @@
 /*=========================================================================================================================================*/
 const backendUrl =
-  "https://db00-158-62-75-82.ngrok-free.app/Final-backend/public/api/";
+  "https://2b0a-110-54-203-173.ngrok-free.app/Final-backend/public/api/";
 
 function login(event) {
   event.preventDefault();
@@ -131,7 +131,5 @@ async function signup(event) {
     // Handle specific error message or show a generic error to the user
   }
 }
-
-// Rest of your code remains unchanged...
 
 /*=========================================================================================================================================*/

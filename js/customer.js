@@ -118,6 +118,7 @@ function bookTable(restaurantId) {
       formdata.append("restaurant_id", restaurantId);
 
       formdata.append("customer_id", customer_id);
+
       const requestOptions = {
         method: "POST",
         headers: myHeaders,
